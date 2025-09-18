@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-!8rut+mnm&t^w*gsymlu9wt#m6(o@czlq0*cnvy42%sel_##+a
 DEBUG = True
 
 ALLOWED_HOSTS = ['10.1.107.41', 'imgwrfserver.cmw.insmet.cu']
+CSRF_TRUSTED_ORIGINS=['http://imgwrfserver.cmw.insmet.cu', 'http://10.1.107.41']
 
 # Configuración de Celery
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
