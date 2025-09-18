@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-!8rut+mnm&t^w*gsymlu9wt#m6(o@czlq0*cnvy42%sel_##+a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['10.1.107.41', 'imgwrfserver.cmw.insmet.cu']
 
 # Configuración de Celery
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
