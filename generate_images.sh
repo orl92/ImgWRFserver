@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Activar el entorno virtual
+source /var/www/ImgWRFserver/.venv/bin/activate
+
 # Definir el valor de --hours según la hora actual
 HORA=$(date +%H)
 case $HORA in
@@ -10,5 +13,11 @@ case $HORA in
   *) echo "Hora no configurada: $HORA"; exit 1 ;;
 esac
 
+# Navegar al directorio del proyecto (opcional, si es necesario)
+# cd /ruta/al/proyecto
+
 # Ejecutar el comando con el argumento correspondiente
-python manage.py generate_images --hours $HOURS_ARG
+python manage.py generate_meteo_images --hours $HOURS_ARG
+
+# Desactivar el entorno virtual (opcional)
+deactivate
