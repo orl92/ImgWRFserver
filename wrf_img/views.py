@@ -9,54 +9,6 @@ from datetime import datetime
 from .models import Simulation, MeteoImage
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class GeneratePlotView(View):
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-            datetime_init = data.get('datetime_init')
-            var_name = data.get('var_name')
-
-            if not datetime_init or not var_name:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Se requieren datetime_init y var_name'
-                }, status=400)
-
-            # Verificar si la simulación ya existe
-            simulation = Simulation.objects.filter(initial_datetime=datetime_init).first()
-            if simulation:
-                # Si existe, verificar si ya hay imágenes para esta variable
-                existing_images = MeteoImage.objects.filter(
-                    simulation=simulation,
-                    variable_name=var_name
-                )
-                if existing_images.exists():
-                    # Devolver las imágenes existentes
-                    image_urls = [request.build_absolute_uri(img.image.url) for img in existing_images]
-                    return JsonResponse({
-                        'status': 'success',
-                        'image_urls': image_urls,
-                        'message': f'Ya existen {existing_images.count()} imágenes para esta simulación y variable'
-                    })
-
-            # Generar y guardar imágenes si no existen
-            saved_images = generate_and_save_meteo_plot(datetime_init, var_name)
-            image_urls = [request.build_absolute_uri(img.image.url) for img in saved_images]
-
-            return JsonResponse({
-                'status': 'success',
-                'image_urls': image_urls,
-                'message': f'Se generaron {len(saved_images)} imágenes'
-            })
-
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=500)
-
-
 class SimulationListView(View):
     def get(self, request):
         # Verificar si se han proporcionado parámetros de filtrado
