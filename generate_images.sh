@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Activar el entorno virtual
-source /var/www/ImgWRFserver/.venv/bin/activate
-
+DJANGODIR=$(cd `dirname $0` && pwd)
 # Definir el valor de --hours según la hora actual
 HORA=$(date +%H)
 case $HORA in
@@ -17,7 +15,4 @@ esac
 # cd /ruta/al/proyecto
 
 # Ejecutar el comando con el argumento correspondiente
-python manage.py generate_meteo_images --hours $HOURS_ARG
-
-# Desactivar el entorno virtual (opcional)
-deactivate
+${DJANGODIR}/.venv/bin/python manage.py generate_images --hours $HOURS_ARG
