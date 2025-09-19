@@ -1,7 +1,3 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from .utils.plot_generators import generate_and_save_meteo_plot
-import json
 from django.http import JsonResponse
 from django.views import View
 from datetime import datetime
