@@ -150,7 +150,7 @@ def generate_and_save_meteo_plot(datetime_init, var_name):
 
 
 def setup_figure(lats, longs, var_name=None):
-    fig = plt.figure(figsize=(12, 8), frameon=False)
+    fig = plt.figure(figsize=(12, 8)) # , frameon=False Para el borde transparente
 
     # Configurar fondo negro para variables de nubosidad
     if var_name in ['clflo', 'clfmi', 'clfhi']:
