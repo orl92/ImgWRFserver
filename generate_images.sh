@@ -15,4 +15,4 @@ esac
 # cd /ruta/al/proyecto
 
 # Ejecutar el comando con el argumento correspondiente
-${DJANGODIR}/.venv/bin/python manage.py generate_images --hours $HOURS_ARG
+${DJANGODIR}/.venv/bin/python ${DJANGODIR}/manage.py generate_images --hours $HOURS_ARG
