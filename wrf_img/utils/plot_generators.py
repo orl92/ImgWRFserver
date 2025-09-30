@@ -165,8 +165,8 @@ def setup_figure(lats, longs, var_name=None):
     ax = plt.axes(projection=ccrs.PlateCarree())
 
     # Configurar fondo del eje para variables de nubosidad
-    if var_name in ['clflo', 'clfmi', 'clfhi']:
-        ax.set_facecolor('white')  # Fondo del mapa en blanco para contraste
+    # if var_name in ['clflo', 'clfmi', 'clfhi']:
+    #     ax.set_facecolor('white')  # Fondo del mapa en blanco para contraste
 
     # Ajustar extensión del mapa al área de los datos
     ax.set_extent([
