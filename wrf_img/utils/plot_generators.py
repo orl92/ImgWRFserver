@@ -154,19 +154,21 @@ def setup_figure(lats, longs, var_name=None):
 
     # Configurar fondo negro para variables de nubosidad
     if var_name in ['clflo', 'clfmi', 'clfhi']:
-        fig.patch.set_facecolor('black')
-        plt.rcParams['savefig.facecolor'] = 'black'
+        # fig.patch.set_facecolor('black')
+        # plt.rcParams['savefig.facecolor'] = 'black'
         plt.rcParams['axes.facecolor'] = 'black'
-        plt.rcParams['text.color'] = 'black'  # Texto en negro
-        plt.rcParams['axes.labelcolor'] = 'black'  # Etiquetas en negro
-        plt.rcParams['xtick.color'] = 'black'  # Ticks en negro
-        plt.rcParams['ytick.color'] = 'black'  # Ticks en negro
+        # plt.rcParams['text.color'] = 'black'  # Texto en negro
+        # plt.rcParams['axes.labelcolor'] = 'black'  # Etiquetas en negro
+        # plt.rcParams['xtick.color'] = 'black'  # Ticks en negro
+        # plt.rcParams['ytick.color'] = 'black'  # Ticks en negro
+    else:
+        plt.rcParams['axes.facecolor'] = 'white'
 
     ax = plt.axes(projection=ccrs.PlateCarree())
 
     # Configurar fondo del eje para variables de nubosidad
-    # if var_name in ['clflo', 'clfmi', 'clfhi']:
-    #     ax.set_facecolor('white')  # Fondo del mapa en blanco para contraste
+    if var_name in ['clflo', 'clfmi', 'clfhi']:
+         ax.set_facecolor('white')  # Fondo del mapa en blanco para contraste
 
     # Ajustar extensión del mapa al área de los datos
     ax.set_extent([
