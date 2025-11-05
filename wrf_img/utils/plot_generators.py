@@ -333,6 +333,6 @@ def setup_axes(ax, plot_config, time_str, initial_dt_str, forecast_hour):
     gl.ylabel_style = {'size': 8}
 
     # Crear título con información completa
-    title = (f"{plot_config['label']} | Inicial: {initial_dt_str} | Hora de simulación: +{forecast_hour}h | Válido: {time_str} UTC")
+    title = (f"{plot_config['label']} | Inicial: {initial_dt_str} | Simulación: +{forecast_hour}h | Válido: {time_str} UTC")
 
     ax.set_title(title, pad=12, fontsize=11)
