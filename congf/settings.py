@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-!8rut+mnm&t^w*gsymlu9wt#m6(o@czlq0*cnvy42%sel_##+a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.1.107.41', 'imgwrfserver.cmw.insmet.cu']
+ALLOWED_HOSTS = ['10.1.107.41', 'imgwrfserver.cmw.insmet.cu', 'localhost']
 CSRF_TRUSTED_ORIGINS=['http://imgwrfserver.cmw.insmet.cu', 'http://10.1.107.41']
 
 # Configuración de Celery
