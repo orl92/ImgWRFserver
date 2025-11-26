@@ -5,6 +5,9 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from wrf_img.utils.plot_generators import generate_and_save_meteo_plot
 
+import warnings
+warnings.filterwarnings('ignore')
+
 
 class Command(BaseCommand):
     help = 'Genera imágenes meteorológicas para todas las variables y horas disponibles'
