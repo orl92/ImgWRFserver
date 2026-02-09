@@ -1,21 +1,40 @@
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from common.utils import get_img_path, get_moon_img_path, get_sun_img_path
-from station_data.models import Station
+from station_data.models import WeatherObservation
 
-class StationSerializer(serializers.ModelSerializer):
-    province_code = serializers.CharField(source='province.code', read_only=True)
-    province_name = serializers.CharField(source='province.name', read_only=True)
+
+class WeatherObservationSerializer(serializers.ModelSerializer):
+    station_name = serializers.CharField(source='station.name', read_only=True)
+    province_name = serializers.CharField(source='station.province.name', read_only=True, allow_null=True)
+    # town_name = serializers.CharField(source='station.town.name', read_only=True, allow_null=True)
 
     class Meta:
-        model = Station
-        fields = ['province_code', 'province_name', 'name', 'number', 'latitude', 'longitude']
+        model = WeatherObservation
+        fields = [
+            # Identificadores
+            'station_number',
 
-class StationObservationSerializer(serializers.Serializer):
-    hour = serializers.CharField()
-    station_number = serializers.IntegerField()
-    data = serializers.JSONField()
+            # Información de estación
+            'station_name', 'province_name',
 
-class StationObservationAllSerializer(serializers.Serializer):
-    hour = serializers.CharField()
-    data = serializers.JSONField()
+            # Fecha y hora
+            'date', 'hour',
+
+            # Datos meteorológicos principales
+            'temperature', 'max_temperature', 'min_temperature',
+            'relative_humidity', 'wind_speed', 'wind_direction',
+            'wind_direction_degrees', 'precipitation_3h', 'precipitation_24h',
+            'cloud_coverage', 'sky_condition',
+
+            # Tiempo presente y pasado
+            'current_weather_code', 'current_weather_description',
+            'past_weather1_code', 'past_weather1_description',
+            'past_weather2_code', 'past_weather2_description',
+
+            # Campos adicionales SYNOP
+            'pressure_station', 'pressure_sea_level', 'dew_point',
+            'visibility', 'cloud_low_type', 'cloud_medium_type', 'cloud_high_type',
+
+            # Campos auxiliares
+            'raw_data', 'is_valid', 'validation_notes'
+        ]
+        read_only_fields = fields
