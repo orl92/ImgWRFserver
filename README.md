@@ -66,6 +66,18 @@ python manage.py generate_meteo_images --hours 00,12
 
 # Combinar todas las opciones
 python manage.py generate_meteo_images --date 20231015 --variables T2,ws10 --hours 00,12
+
+# Generar una observación por estación activa
+python manage.py generate_test_observations --date=20240115 --hour=12
+
+# Generar 5 observaciones para estaciones específicas
+python manage.py generate_test_observations --date=20240115 --hour=12 --stations=78350,78351 --count=5
+
+# Ver información detallada sin guardar
+python manage.py generate_test_observations --date=20240115 --hour=06 --verbose --dry-run
+
+# Forzar regeneración incluso si ya existen datos
+python manage.py generate_test_observations --date=20240115 --hour=18 --force
 ```
 ## Parámetros disponibles
 ### Parámetro	Descripción	Valor por defecto
