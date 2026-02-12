@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.core.management import call_command
 
 # Configura el entorno de Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'congf.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 

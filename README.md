@@ -256,7 +256,7 @@ After=network.target
 User=tu_usuario
 Group=www-data
 WorkingDirectory=/ruta/a/tu/proyecto
-ExecStart=/ruta/a/tu/entorno/bin/gunicorn --access-logfile - --workers 3 --bind unix:/ruta/a/tu/proyecto/app.sock congf.wsgi:application
+ExecStart=/ruta/a/tu/entorno/bin/gunicorn --access-logfile - --workers 3 --bind unix:/ruta/a/tu/proyecto/app.sock config.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
