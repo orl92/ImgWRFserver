@@ -28,6 +28,6 @@ urlpatterns = [
     # Documentacion
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='doc'),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('wrf_img/', include('wrf_img.urls')),
+    path('simulations/', include('wrf_img.urls')),
     path('station_data/', include('station_data.urls')),
             ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
