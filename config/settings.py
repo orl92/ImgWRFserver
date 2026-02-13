@@ -33,8 +33,10 @@ SECRET_KEY = 'django-insecure-!8rut+mnm&t^w*gsymlu9wt#m6(o@czlq0*cnvy42%sel_##+a
 # Ahora obtén DEBUG desde las variables de entorno
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['10.1.107.41', '127.0.0.1', 'imgwrfserver.cmw.insmet.cu', 'localhost']
-CSRF_TRUSTED_ORIGINS=['http://imgwrfserver.cmw.insmet.cu', 'http://10.1.107.41']
+# ALLOWED_HOSTS = ['10.1.107.41', '127.0.0.1', 'apimet.cmw.insmet.cu', 'localhost']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# CSRF_TRUSTED_ORIGINS=['http://apimet.cmw.insmet.cu', 'http://10.1.107.41']
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 
 # Configuración de Celery
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
