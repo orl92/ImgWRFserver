@@ -12,8 +12,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import matplotlib
+from dotenv import load_dotenv
+
 
 matplotlib.use('Agg')
+
+# Carga las variables del archivo .env
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,7 +30,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!8rut+mnm&t^w*gsymlu9wt#m6(o@czlq0*cnvy42%sel_##+a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Ahora obtén DEBUG desde las variables de entorno
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['10.1.107.41', '127.0.0.1', 'imgwrfserver.cmw.insmet.cu', 'localhost']
 CSRF_TRUSTED_ORIGINS=['http://imgwrfserver.cmw.insmet.cu', 'http://10.1.107.41']
