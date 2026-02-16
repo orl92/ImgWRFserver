@@ -1,7 +1,9 @@
 import os
+
+from cryptography.fernet import Fernet
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management.utils import get_random_secret_key
-from cryptography.fernet import Fernet
+
 
 class Command(BaseCommand):
     help = 'Genera un archivo .env completo con todas las variables necesarias para el proyecto'
@@ -28,12 +30,18 @@ class Command(BaseCommand):
             action='store_true',
             help='Solo genera y muestra las claves (ENCRYPTION_KEY y SECRET_KEY cifrada), no crea .env',
         )
+        parser.add_argument(
+            '--https',
+            action='store_true',
+            help='En modo no interactivo, usa https:// en las sugerencias de CSRF_TRUSTED_ORIGINS (por defecto http://)',
+        )
 
     def handle(self, *args, **options):
         env_file = options['env_file']
         non_interactive = options['non_interactive']
         force = options['force']
         only_keys = options['only_keys']
+        use_https = options['https']
 
         # --- Generar claves (siempre las necesitamos) ---
         self.stdout.write("Generando claves de cifrado...")
@@ -60,7 +68,6 @@ class Command(BaseCommand):
 
         # Diccionario para almacenar las variables
         env_vars = {}
-
         env_vars['ENCRYPTION_KEY'] = encryption_key
         env_vars['SECRET_KEY'] = encrypted_secret_key
 
@@ -68,12 +75,30 @@ class Command(BaseCommand):
         if non_interactive:
             debug = 'True'
             allowed_hosts = 'localhost,127.0.0.1'
-            csrf_origins = ''
+            # En modo no interactivo, generamos CSRF con el esquema definido por --https
+            scheme = 'https' if use_https else 'http'
+            csrf_origins = f'{scheme}://localhost,{scheme}://127.0.0.1'
         else:
+            # Preguntar por DEBUG
             debug = input("DEBUG (True/False) [True]: ") or 'True'
+
+            # Preguntar por ALLOWED_HOSTS
             default_hosts = 'localhost,127.0.0.1'
             allowed_hosts = input(f"ALLOWED_HOSTS (separados por coma) [{default_hosts}]: ") or default_hosts
-            csrf_origins = input("CSRF_TRUSTED_ORIGINS (separados por coma, incluyendo esquema http:// o https://) [dejar vacío]: ") or ''
+
+            # Preguntar si se usará HTTPS (para sugerir CSRF)
+            use_https_answer = input("¿Usarás HTTPS en producción? (s/N): ").lower() == 's'
+            scheme = 'https' if use_https_answer else 'http'
+
+            # Generar sugerencia para CSRF basada en los hosts ingresados
+            host_list = [h.strip() for h in allowed_hosts.split(',') if h.strip()]
+            suggested_list = [f'{scheme}://{host}' for host in host_list if host]
+            suggested_csrf = ','.join(suggested_list) if suggested_list else f'{scheme}://localhost,{scheme}://127.0.0.1'
+
+            csrf_origins = input(
+                f"CSRF_TRUSTED_ORIGINS (separados por coma, incluyendo esquema http:// o https://)\n"
+                f"[{suggested_csrf}]: "
+            ) or suggested_csrf
 
         env_vars['DEBUG'] = debug
         env_vars['ALLOWED_HOSTS'] = allowed_hosts
