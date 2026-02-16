@@ -1,15 +1,15 @@
 # Django Meteo Simulation API
 Esta API permite gestionar y visualizar simulaciones meteorológicas, generando y recuperando imágenes de variables meteorológicas específicas.
 
-# 🌟 Características
-* 📊 Listado de todas las simulaciones disponibles
-* 🌤️ Generación de gráficos meteorológicos
-* 🖼️ Recuperación de imágenes existentes para simulaciones y variables específicas
-* 💾 Almacenamiento eficiente con eliminación automática de archivos
-* 🔄 Evita duplicados: si ya existen imágenes para una simulación y variable, devuelve las existentes
-*  ⚡ Comandos de gestión para generación masiva de imágenes
+# Características
+* Listado de todas las simulaciones disponibles
+* Generación de gráficos meteorológicos
+* Recuperación de imágenes existentes para simulaciones y variables específicas
+* Almacenamiento eficiente con eliminación automática de archivos
+* Evita duplicados: si ya existen imágenes para una simulación y variable, devuelve las existentes
+*  Comandos de gestión para generación masiva de imágenes
 
-# 🚀 Instalación y configuración
+# Instalación y configuración
 ## Requisitos previos
 ```bash
 pip install django pillow requests numpy matplotlib cartopy gunicorn
@@ -29,6 +29,66 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 ```
+
+### Configuración segura de la SECRET_KEY
+Por razones de seguridad, la ```SECRET_KEY``` de Django no se almacena en texto plano en el archivo ```.env```, sino cifrada mediante la librería ```cryptography```. De esta forma, aunque alguien obtuviera tu archivo ```.env```, no podría usar directamente la clave secreta.
+
+Requisito adicional
+Instala la dependencia necesaria para el cifrado:
+
+```bash
+pip install cryptography
+```
+Generación de claves
+La primera vez que configures el proyecto (o cuando necesites regenerar la ```SECRET_KEY```), ejecuta el script ```generate_secret.py``` que se encuentra en la carpeta ```common```/:
+
+```bash
+python common/generate_secret.py
+```
+Este script realizará tres acciones:
+
+Generará una clave de cifrado maestra (```ENCRYPTION_KEY```).
+
+Generará una ```SECRET_KEY``` aleatoria de Django.
+
+Cifrará la ```SECRET_KEY``` usando la clave maestra y mostrará el resultado.
+
+La salida será similar a esta:
+
+```text
+Guarda esto en tu .env como ENCRYPTION_KEY:
+5Xk0Z9y8W7q6L2j4R1t3B8nA6cV9fG7hJ3kM2pQ5s=
+
+SECRET_KEY en texto plano (NO la guardes así):
+django-insecure-&amp;42...
+
+Guarda esto en tu .env como SECRET_KEY (valor cifrado):
+gAAAAABm...
+```
+Configuración del archivo ```.env```
+Copia los valores impresos y agrégalos a tu archivo ```.env``` (si no existe, créalo en la raíz del proyecto):
+
+```ini
+ENCRYPTION_KEY=5Xk0Z9y8W7q6L2j4R1t3B8nA6cV9fG7hJ3kM2pQ5s=
+SECRET_KEY=gAAAAABm...
+# El resto de variables (DEBUG, ALLOWED_HOSTS, etc.)
+```
+Importante:
+
+La ```ENCRYPTION_KEY``` es tan sensible como la propia ```SECRET_KEY```. No la pierdas, guárdala también en un lugar seguro (gestor de contraseñas) por si necesitas recuperar el acceso.
+
+Nunca subas tu archivo ```.env``` al repositorio (ya debería estar en ```.gitignore```).
+
+Si cambias la ```ENCRYPTION_KEY```, deberás volver a cifrar la ```SECRET_KEY``` y actualizar el archivo ```.env```.
+
+¿Cómo funciona internamente?
+En ```settings.py``` se define una función ```decrypt_secret_key``` que utiliza ```cryptography.fernet.Fernet``` para descifrar el valor de ```SECRET_KEY``` usando ```ENCRYPTION_KEY```. Esta función se llama al cargar la configuración, de modo que Django siempre trabaja con la clave original en memoria.
+
+Si por algún motivo las variables de entorno faltan o el descifrado falla, Django lanzará una excepción ```ImproperlyConfigured``` y no arrancará, evitando así el uso de una clave inválida.
+
+Nota sobre regeneración de claves
+Si en el futuro necesitas cambiar la ```SECRET_KEY``` (por ejemplo, por una rotación de seguridad), repite el proceso con el script ```generate_secret.py```. Asegúrate de mantener la misma ```ENCRYPTION_KEY``` a menos que quieras cambiar también la clave maestra (en cuyo caso deberás actualizar todas las claves cifradas). Recuerda que cambiar la ```SECRET_KEY``` invalidará todas las sesiones existentes, t```okens CSRF```, etc., por lo que debe hacerse con cuidado.
+
 ### Configuración de URLs
 En el archivo principal ```urls.py```:
 
@@ -47,7 +107,7 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py collectstatic
 ```
-# 📋 Comandos de gestión
+# Comandos de gestión
 La aplicación incluye un comando personalizado para generar imágenes meteorológicas de forma masiva.
 
 ## Uso básico
@@ -94,7 +154,7 @@ Las siguientes variables meteorológicas están disponibles para generación:
     'lfc', 'NOAHRES', 'SWDOWN', 'GLW', 'SWNORM', 'OLR',
 ]
 ```
-# 🌐 Endpoints de la API
+# Endpoints de la API
 ### 1. Listar simulaciones / Obtener imágenes
 URL: ```/simulations/```
 
@@ -179,7 +239,7 @@ Genera y guarda imágenes para una simulación y variable específicas. Si ya ex
     "message": "Ya existen 1 imágenes para esta simulación y variable"
 }
 ```
-# 🗃️ Modelos de datos
+# Modelos de datos
 ## Simulation
 * ```initial_datetime```: Fecha y hora inicial de la simulación (única)
 
@@ -198,7 +258,7 @@ Genera y guarda imágenes para una simulación y variable específicas. Si ya ex
 
 * ```data_min, data_max, data_mean```: Estadísticas de los datos
 
-# 📁 Estructura de almacenamiento
+# Estructura de almacenamiento
 Las imágenes se almacenan en la siguiente estructura:
 
 ```text
@@ -209,7 +269,7 @@ media/
                 imagen1.png
                 imagen2.png
 ```
-# 💻 Uso típico
+# Uso típico
 Generar imágenes para una nueva simulación:
 ```bash
 curl -X POST -H "Content-Type: application/json" -d '{"datetime_init": "2025-09-15T12:00:00", "var_name": "T2"}' http://localhost:8000/api/generate-plot/
@@ -222,14 +282,14 @@ Obtener imágenes para una simulación específica:
 ```bash
 curl "http://localhost:8000/api/simulations/?datetime_init=2025091512&var_name=T2"
 ```
-# ⚠️ Manejo de errores
+# Manejo de errores
 La API devuelve códigos de estado HTTP apropiados y mensajes de error descriptivos:
 
 * ```400 Bad Request```: Parámetros faltantes o formato incorrecto
 * ```404 Not Found```: Recurso no encontrado
 * ```500 Internal Server Error```: Error interno del servidor
 
-# 📝 Notas importantes
+# Notas importantes
 * Las fechas deben seguir el formato especificado para cada endpoint
 
 * El sistema evita la duplicación de imágenes para la misma simulación y variable
@@ -240,7 +300,7 @@ La API devuelve códigos de estado HTTP apropiados y mensajes de error descripti
 
 * Las simulaciones se ordenan por fecha descendente por defecto
 
-# 🌦️ Ejemplos de variables meteorológicas
+# Ejemplos de variables meteorológicas
 ### Variable	Descripción
 * ```T2```	Temperatura a 2 metros
 * ```td2```	Temperatura de punto de rocío
@@ -249,7 +309,7 @@ La API devuelve códigos de estado HTTP apropiados y mensajes de error descripti
 * ```ws10```	Velocidad del viento a 10 metros
 * ```wd10```	Dirección del viento a 10 metros
 
-# 🚀 Despliegue con Nginx y Gunicorn
+# Despliegue con Nginx y Gunicorn
 ### 1. Instalar Nginx y Gunicorn
 ```bash
 sudo apt update
@@ -320,8 +380,8 @@ sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d tu_dominio.com
 ```
 
-# 🛠️ Soporte
+# Soporte
 Para reportar problemas o solicitar características, por favor abra un issue en el repositorio del proyecto.
 
-# 📄 Licencia
+# Licencia
 Este proyecto está bajo la Licencia MIT. Ver el archivo LICENSE para más detalles.
