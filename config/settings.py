@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import sys
 from pathlib import Path
 import matplotlib
 from dotenv import load_dotenv
@@ -47,10 +48,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = decrypt_secret_key(
-    os.getenv('SECRET_KEY'),
-    os.getenv('ENCRYPTION_KEY')
-)
+
+
+# Si estamos ejecutando el comando para generar claves, usar un valor dummy
+if 'generate_secret_key' in sys.argv:
+    SECRET_KEY = 'dummy-key-for-command-only'
+else:
+    SECRET_KEY = decrypt_secret_key(
+        os.getenv('SECRET_KEY'),
+        os.getenv('ENCRYPTION_KEY')
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
@@ -99,7 +106,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

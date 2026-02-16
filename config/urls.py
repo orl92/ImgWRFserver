@@ -23,11 +23,20 @@ from drf_spectacular.views import (
                                    SpectacularSwaggerView,
 )
 
+handler400 = 'core.views.my400_view'
+handler403 = 'core.views.my400_view'
+handler404 = 'core.views.my400_view'
+handler500 = 'core.views.my400_view'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Documentacion
-    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='doc'),
+
+    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('simulations/', include('wrf_img.urls')),
-    path('station_data/', include('station_data.urls')),
-            ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    path('api/simulations/', include('wrf_img.urls')),
+    path('api/station_data/', include('station_data.urls')),
+            ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

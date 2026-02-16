@@ -1,77 +1,75 @@
-from django.http import JsonResponse
-from django.views import View
-from datetime import datetime
+from rest_framework import status
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from .models import Simulation, MeteoImage
+from .serializers import SimulationSerializer, MeteoImageSerializer
 
 
-class SimulationListView(View):
+class SimulationListView(GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = SimulationSerializer  # Se usa cuando no hay filtros
+
+    def get_queryset(self):
+        return Simulation.objects.all().order_by('-initial_datetime')
+
     def get(self, request):
-        # Verificar si se han proporcionado parámetros de filtrado
         datetime_init = request.GET.get('datetime_init')
         var_name = request.GET.get('var_name')
 
-        # Si se proporcionan ambos parámetros, buscar imágenes específicas
+        # Caso con filtros: devolver imágenes
         if datetime_init and var_name:
             try:
-                # Convertir el formato YYYYMMDDHH a datetime
+                # Convertir a datetime (asumiendo formato YYYYMMDDHH)
+                from datetime import datetime
                 dt_obj = datetime.strptime(datetime_init, '%Y%m%d%H')
-
-                # Buscar la simulación
                 simulation = Simulation.objects.filter(initial_datetime=dt_obj).first()
 
                 if not simulation:
-                    return JsonResponse({
+                    return Response({
                         'status': 'error',
                         'message': f'No se encontró simulación para la fecha: {datetime_init}'
-                    }, status=404)
+                    }, status=status.HTTP_404_NOT_FOUND)
 
-                # Buscar las imágenes para esta simulación y variable
                 images = MeteoImage.objects.filter(
                     simulation=simulation,
                     variable_name=var_name
                 ).order_by('valid_datetime')
 
                 if not images.exists():
-                    return JsonResponse({
+                    return Response({
                         'status': 'error',
                         'message': f'No se encontraron imágenes para la variable: {var_name}'
-                    }, status=404)
+                    }, status=status.HTTP_404_NOT_FOUND)
 
-                # Construir URLs de las imágenes
-                image_urls = [request.build_absolute_uri(img.image.url) for img in images]
-
-                return JsonResponse({
+                # Serializar imágenes pasando el request para construir URLs absolutas
+                serializer = MeteoImageSerializer(images, many=True, context={'request': request})
+                return Response({
                     'status': 'success',
                     'simulation_date': simulation.initial_datetime.isoformat(),
                     'variable_name': var_name,
-                    'image_urls': image_urls,
-                    'count': len(image_urls)
+                    'image_urls': [item['image_url'] for item in serializer.data],
+                    'count': len(serializer.data)
                 })
 
             except ValueError:
-                return JsonResponse({
+                return Response({
                     'status': 'error',
                     'message': 'Formato de fecha inválido. Use YYYYMMDDHH'
-                }, status=400)
+                }, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
-                return JsonResponse({
+                return Response({
                     'status': 'error',
                     'message': str(e)
-                }, status=500)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Si no se proporcionan parámetros, devolver todas las simulaciones
+        # Sin filtros: devolver lista de simulaciones
         else:
-            simulations = Simulation.objects.all().order_by('-initial_datetime')
-
-            # Crear lista de fechas en formato ISO
-            simulation_dates = [
-                sim.initial_datetime.isoformat()
-                for sim in simulations
-            ]
-
-            return JsonResponse({
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({
                 'status': 'success',
-                'simulations': simulation_dates,
-                'count': len(simulation_dates)
+                'simulations': [item['initial_datetime'] for item in serializer.data],
+                'count': len(serializer.data)
             })
