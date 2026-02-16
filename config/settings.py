@@ -12,18 +12,20 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import sys
 from pathlib import Path
-import matplotlib
-from dotenv import load_dotenv
-from django.core.exceptions import ImproperlyConfigured
-from cryptography.fernet import Fernet
 
+import matplotlib
+from cryptography.fernet import Fernet
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 matplotlib.use('Agg')
 
 # Carga las variables del archivo .env
 load_dotenv()
 
+# -------------------------------------------------------------------
 # Función para descifrar la SECRET_KEY
+# -------------------------------------------------------------------
 def decrypt_secret_key(encrypted_key, encryption_key):
     """
     Descifra la SECRET_KEY usando la clave de cifrado.
@@ -42,16 +44,16 @@ def decrypt_secret_key(encrypted_key, encryption_key):
             f"Error al descifrar SECRET_KEY: {e}. Verifica que ENCRYPTION_KEY sea correcta."
         )
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# -------------------------------------------------------------------
+# Ruta base del proyecto
+# -------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-# SECURITY WARNING: keep the secret key used in production secret!
-
-
-# Si estamos ejecutando el comando para generar claves, usar un valor dummy
-if 'generate_secret_key' in sys.argv:
+# -------------------------------------------------------------------
+# SECRET KEY (cifrada en .env)
+# -------------------------------------------------------------------
+# Si estamos ejecutando comandos que generan claves, usamos un valor dummy
+if any(cmd in sys.argv for cmd in ['generate_secret_key', 'setup_env']):
     SECRET_KEY = 'dummy-key-for-command-only'
 else:
     SECRET_KEY = decrypt_secret_key(
@@ -59,23 +61,63 @@ else:
         os.getenv('ENCRYPTION_KEY')
     )
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# -------------------------------------------------------------------
+# Configuración básica: DEBUG, ALLOWED_HOSTS, CSRF
+# -------------------------------------------------------------------
 DEBUG = os.getenv('DEBUG') == 'True'
 
-# ALLOWED_HOSTS = ['10.1.107.41', '127.0.0.1', 'apimet.cmw.insmet.cu', 'localhost']
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-# CSRF_TRUSTED_ORIGINS=['http://apimet.cmw.insmet.cu', 'http://10.1.107.41']
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 
-# Configuración de Celery
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# Filtra elementos vacíos que puedan causar error en Django 4.0+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+
+# -------------------------------------------------------------------
+# Base de datos: si existen variables DB_* se usa esa base,
+# de lo contrario SQLite (ideal para desarrollo)
+# -------------------------------------------------------------------
+if os.getenv('DB_ENGINE'):
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE'),
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# -------------------------------------------------------------------
+# Celery (configuración básica)
+# -------------------------------------------------------------------
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'  # Ajusta según tu zona horaria
+CELERY_TIMEZONE = 'UTC'
 
+# -------------------------------------------------------------------
+# Correo electrónico (opcional)
+# -------------------------------------------------------------------
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+
+# -------------------------------------------------------------------
 # Application definition
-
+# -------------------------------------------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -120,19 +162,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# -------------------------------------------------------------------
+# Validación de contraseñas
+# -------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -148,29 +180,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# -------------------------------------------------------------------
+# Internacionalización
+# -------------------------------------------------------------------
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# -------------------------------------------------------------------
+# Archivos estáticos y media
+# -------------------------------------------------------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# -------------------------------------------------------------------
+# Configuración de Django REST Framework y Spectacular
+# -------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
@@ -185,7 +214,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
-
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Django Meteo Simulation API',
