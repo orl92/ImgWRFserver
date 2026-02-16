@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 import matplotlib
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
+from cryptography.fernet import Fernet
 
 
 matplotlib.use('Agg')
@@ -20,17 +22,37 @@ matplotlib.use('Agg')
 # Carga las variables del archivo .env
 load_dotenv()
 
+# Función para descifrar la SECRET_KEY
+def decrypt_secret_key(encrypted_key, encryption_key):
+    """
+    Descifra la SECRET_KEY usando la clave de cifrado.
+    Ambas deben ser cadenas de texto.
+    """
+    if not encrypted_key or not encryption_key:
+        raise ImproperlyConfigured(
+            "Faltan las variables de entorno SECRET_KEY o ENCRYPTION_KEY"
+        )
+    try:
+        fernet = Fernet(encryption_key.encode())
+        decrypted = fernet.decrypt(encrypted_key.encode()).decode()
+        return decrypted
+    except Exception as e:
+        raise ImproperlyConfigured(
+            f"Error al descifrar SECRET_KEY: {e}. Verifica que ENCRYPTION_KEY sea correcta."
+        )
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!8rut+mnm&t^w*gsymlu9wt#m6(o@czlq0*cnvy42%sel_##+a'
+SECRET_KEY = decrypt_secret_key(
+    os.getenv('SECRET_KEY'),
+    os.getenv('ENCRYPTION_KEY')
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Ahora obtén DEBUG desde las variables de entorno
 DEBUG = os.getenv('DEBUG') == 'True'
 
 # ALLOWED_HOSTS = ['10.1.107.41', '127.0.0.1', 'apimet.cmw.insmet.cu', 'localhost']
