@@ -1,17 +1,17 @@
-# station_data/management/commands/import_weather_data.py
 import os
 import sys
 from datetime import datetime, time
+
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 try:
     from station_data.data.GetData import GetData
-    from station_data.models import WeatherObservation, Station, Province, Town
+    from station_data.models import Province, Station, Town, WeatherObservation
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '../../../'))
     from station_data.data.GetData import GetData
-    from station_data.models import WeatherObservation, Station, Province, Town
+    from station_data.models import Province, Station, Town, WeatherObservation
 
 
 class Command(BaseCommand):

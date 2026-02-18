@@ -1,6 +1,6 @@
-# station_data/management/commands/generate_test_observations.py
 import random
 from datetime import datetime, time
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from station_data.models import Station, WeatherObservation

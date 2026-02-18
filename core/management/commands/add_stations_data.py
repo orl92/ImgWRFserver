@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from station_data.models import Province, Town, Station
+from station_data.models import Province, Station, Town
 
 
 class Command(BaseCommand):
