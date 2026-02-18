@@ -95,21 +95,22 @@ La aplicación incluye comandos personalizados para generar datos meteorológico
 **Generar imágenes meteorológicas**
 ```bash
 # Fecha actual, todas las variables y horas 00,06,12,18
-python manage.py generate_meteo_images
+python manage.py generate_images
 
 # Fecha específica
-python manage.py generate_meteo_images --date 20231015
+python manage.py generate_images --date 20231015
 
 # Variables específicas
-python manage.py generate_meteo_images --variables T2,rh2,ws10
+python manage.py generate_images --variables T2,rh2,ws10
 
 # Horas específicas
-python manage.py generate_meteo_images --hours 00,12
+python manage.py generate_images --hours 00,12
 
 # Combinar opciones
-python manage.py generate_meteo_images --date 20231015 --variables T2,ws10 --hours 00,12
-Generar observaciones de estaciones
-bash
+python manage.py generate_images --date 20231015 --variables T2,ws10 --hours 00,12
+```
+**Generar observaciones de estaciones**
+```bash
 # Generar una observación por estación activa
 python manage.py generate_test_observations --date=20240115 --hour=12
 
@@ -210,15 +211,15 @@ curl http://localhost:8000/api/station-data/
 **Nota:** Los campos y valores mostrados son ilustrativos; la estructura real puede variar según la implementación de tu modelo de datos.
 
 ## 🗃️ Modelos de datos
-
-**Simulation**
+  
+### Simulation:
 `initial_datetime`: Fecha y hora de inicio de la simulación (única).
 
 `created_at`: Fecha de creación del registro.
 
 `description`: Descripción opcional.
 
-**MeteoImage**
+### MeteoImage:
 `simulation`: ForeignKey a Simulation.
 
 `valid_datetime`: Fecha y hora válida de la imagen.
